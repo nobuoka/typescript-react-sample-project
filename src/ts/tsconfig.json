@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "noEmitOnError": true,
+    "noImplicitAny": true,
+    "module": "commonjs",
+    "jsx": "react"
+  }
+}

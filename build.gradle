@@ -1,0 +1,45 @@
+plugins {
+    id "com.moowork.node" version "0.11"
+}
+
+node {
+    version = '5.1.0'
+    npmVersion = '3.4.1'
+    download = true
+}
+
+task clean() {}
+
+task dtsmInstall(type: NodeTask, dependsOn: npmInstall) {
+    script = file('node_modules/dtsm/bin/dtsm')
+    args = ['install']
+    inputs.file 'dtsm.json'
+    outputs.dir 'typings'
+}
+task dtsmClean(type: Delete) { delete 'typings' }
+clean.dependsOn dtsmClean
+
+task compileTypeScript(type: NodeTask, dependsOn: [npmInstall, dtsmInstall]) {
+    script = file('node_modules/typescript/bin/tsc')
+    args = ['-p', 'src/ts', '--outDir', 'built/typescript']
+    inputs.sourceDir 'src/ts'
+    outputs.dir 'built/typescript'
+}
+task cleanTypeScript(type: Delete) { delete 'built/typescript' }
+clean.dependsOn cleanTypeScript
+
+task webpack(type: NodeTask, dependsOn: [npmInstall, compileTypeScript]) {
+    script = file('node_modules/webpack/bin/webpack')
+    inputs.sourceDir 'built/typescript'
+    outputs.dir 'built/webpack'
+}
+task webpackClean(type: Delete) { delete 'built/webpack' }
+clean.dependsOn webpackClean
+
+task assemble(dependsOn: webpack)
+
+task test(dependsOn: assemble) // Currently, there is no test.
+
+task check(dependsOn: test)
+
+task build(dependsOn: [assemble, check])
